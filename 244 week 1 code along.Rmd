@@ -1,0 +1,37 @@
+---
+title: "244 Lab Week 1"
+author: "Kat Cotti"
+date: "1/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set
+library(tidyverse)
+library(here) #Paths to read in data 
+library(sf) #spatial data wrangling 
+library(tmap) #interactive map 
+library(dplyr)
+```
+
+### Read in SF trees data: 
+
+```{r}
+#Read in the data:
+sf_trees <-
+  read.csv(here("data", "sf_trees", "sf_trees.csv"))
+```
+
+### Basic Wrangling Reminders:
+
+Refresh some skills for data wrangling and summary statistics using 'dplyr' & make a graph.
+
+```{r}
+top_five_status <- sf_trees %>%  
+  count(legal_status) %>% #count function - replaces need for group_by by recognizing groups in the data, counts values (replaces summarize n), and puts in a table - count by legal status 
+  drop_na(legal_status) %>% #removes any rows with missing or NA values for variable you specify - think about missing values before you remove them (206 final lecture)
+  rename(tree_count = n) %>% # new name = old name  
+  relocate(tree_count) %>% #moves tree count column to the front 
+  slice_max(tree_count, n =5) #allows you to identify the rows with the highest value of the variable you specify and keep the top # of what you specify
+```
+
