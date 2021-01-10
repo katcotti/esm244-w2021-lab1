@@ -12,6 +12,7 @@ library(here) #Paths to read in data
 library(sf) #spatial data wrangling 
 library(tmap) #interactive map 
 library(dplyr)
+library(tidyr)
 ```
 
 ### Read in SF trees data: 
@@ -33,5 +34,48 @@ top_five_status <- sf_trees %>%
   rename(tree_count = n) %>% # new name = old name  
   relocate(tree_count) %>% #moves tree count column to the front 
   slice_max(tree_count, n =5) #allows you to identify the rows with the highest value of the variable you specify and keep the top # of what you specify
+```
+
+Make a graph of those top 5 observations by legal status 
+
+```{r}
+ggplot(data = top_five_status, aes(x = fct_reorder(legal_status, tree_count), y = tree_count)) +
+  geom_col() +
+  labs(x = "Legal Status",
+       y = "Tree Count") +
+  coord_flip() + #flips the axis to fit in long title names 
+  theme_minimal() 
+# Default for ggplot is to plot in alphabetical order of category 
+```
+
+### A few more data wrangling refresher examples
+
+Only want to keep observations (rows) for Blackwood Acacia Trees 
+
+```{r}
+blackwood_acacia <- sf_trees %>% 
+  filter(str_detect(species, "Blackwood Acacia")) %>%  #look within a dataset and filter to obnly keep rows where within variable given the string is detected 
+  select(legal_status, date, latitude, longitude) #picks columns you want to keep or exclude
+ 
+## Make a faux map of the spatial orientation of this data using latitude and longitude:
+ggplot(data = blackwood_acacia,
+       aes(x = longitude,
+            y = latitude)) +
+  geom_point()
+```
+
+### Use 'tidyr' separate() and unite() functions 
+
+Useful for combining OR separating columns ie. in this data set there are scientific names separated by :: to the common name 
+
+```{r}
+sf_trees_sep <- sf_trees %>% 
+  separate(species, into = c("spp_scientific", "spp_common"), sep = "::") #separates the species column into scientific name and common name separated at :: 
+```
+
+Example: tidyr:: unite() - combine 2 columns into 1 column 
+```{r}
+sf_treess_unite <- sf_trees %>% 
+  unite("id_status", tree_id:legal_status, sep = "_cool_") #new column name, colon indicates from this column to the next, what is going to be the separator 
 ```
 
